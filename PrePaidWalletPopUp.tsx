@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View, Platform } from 'react-native';
 import CustomPayButton from './CustomPayButton';
-
+import { ApplePayButton, useApplePay } from '@stripe/stripe-react-native';
 import styles from './styles';
 import usePaymentHook from './usePaymentHook';
 
@@ -13,14 +13,18 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState('');
   const { fetchURLForPayPal, paypal } = usePaymentHook();
-  const openPayPal = async (amount: number) => {
-    const url = await fetchURLForPayPal({ amount });
-    setPaymentUrl(url);
-    setModalVisible(true);
-  };
+  const { isApplePaySupported } = useApplePay();
+  const { applePay } = usePaymentHook()
 
-  const ApplePayButton = () => {
-    return <CustomApplePayButton amount={topUp[selected]} openShippingModal={openShippingModal} />;
+  const renderApplePayButton = () => {
+    return <ApplePayButton onPress={applePay(topUp[selected])}
+     type="plain"
+    buttonStyle="black"
+    borderRadius={4}
+    style={{
+      width: '100%',
+      height: 50,
+    }}/>;
   };
 
   const GooglePayButton = () => {
@@ -43,24 +47,13 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
       />
     );
   };
-  const PaypalButton = () => {
-    const amount = topUp[selected];
-    return (
-      <CustomPayButton
-        amount={topUp[selected]}
-        gateway={'paypal'}
-      />
-    );
-  };
 
   const AllPaymentButton = () => {
     return (
       <View style = {styles.buttonContainer}>
-        {/* {ApplePayButton()}
-        {GooglePayButton()} */}
-        {GiroPayButton()}
-        {EPSButton()}
-        {PaypalButton()}
+        {Platform.OS === 'ios' ? isApplePaySupported? renderApplePayButton() : alert('Apple pay not supported') : GooglePayButton()}
+        {/* {GiroPayButton()} */}
+        {/* {EPSButton()} */}
       </View>
     );
   };
@@ -73,6 +66,7 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
         renderItem={({ item, index }) => {
           return (
             <Pressable
+              key={index}
               style={[styles.itemView, selected === index && styles.itemSelected]}
               onPress={() => setSelected(index)}
             >

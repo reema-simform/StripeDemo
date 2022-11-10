@@ -7,7 +7,7 @@ import {
   useGooglePay
 } from '@stripe/stripe-react-native';
 import { useEffect, useState } from 'react';
-const API_URL = ''
+const API_URL = 'https://glory-fir-sloth.glitch.me'
 
 const usePaymentHook = () => {
   const { loading, confirmPayment } = useConfirmPayment();
@@ -20,8 +20,9 @@ const usePaymentHook = () => {
     setPaymentLoading(loading);
   }, [loading]);
 
-  const onSuccess = () => {
+  const onSuccess = (message: string) => {
       setPaymentLoading(false);
+      alert(message)
   };
 
   const showErrorMessage = (message: string, amount: number) => {
@@ -30,28 +31,33 @@ const usePaymentHook = () => {
   };
 
   const fetchPaymentIntentClientSecret = async ({ amount, gateway }) => {
-    const response = await fetch(`${API_URL}/'payments/paypal', {
+    const res =  await fetch(`${API_URL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         amount: (amount * 100).toString(),
-        currency: 'eur',
+        currency: 'EUR',
         gateway: gateway,
       }),
+    }).then((response) => response.json())
+    .then((data) => data)
+    .catch((error) => {
+     console.log(error)
     });
-    const { clientSecret, error } = await response.json();
-  
-    return { clientSecret, error };
+    console.log(res)
+    return res?.client_secret;
   };
 
 
   const handleResponse = ({ error, paymentIntent, amount }) => {
     if (error) {
+      console.log('error',error)
       alert(error?.localizedMessage);
     } else if (paymentIntent) {
-      onSuccess('Payment done successfully!');
+      onSuccess(`Payment of EUR ${amount} is successful! `);
     }
   };
 
@@ -61,7 +67,7 @@ const usePaymentHook = () => {
     const clientSecret = await fetchPaymentIntentClientSecret({ amount, gateway: 'paypal' });
     if (clientSecret) {
       const billingDetails: BillingDetails = {
-        name: user?.username
+        name: 'Test'
       };
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
         paymentMethodType: 'PayPal',
@@ -83,7 +89,7 @@ const usePaymentHook = () => {
       alert(error?.localizedMessage || '', amount);
       return;
     } else {
-      alert('Payment Successfull')
+      onSuccess(`Payment of EUR ${amount} is successful! `)
     }
   };
 
@@ -106,7 +112,7 @@ const usePaymentHook = () => {
         if (confirmError) {
           showErrorMessage(confirmError?.localizedMessage || '', amount);
         } else {
-          alert('Payment Successfull')
+          onSuccess(`Payment of EUR ${amount} is successful! `)
         }
       }
     }
@@ -136,18 +142,20 @@ const usePaymentHook = () => {
     if (paymentLoading) return;
     setPaymentLoading(true);
     const clientSecret = await fetchPaymentIntentClientSecret({ amount, gateway: 'giropay' });
+    console.log('inside giropay',clientSecret)
     if (clientSecret) {
       const billingDetails: BillingDetails = {
-        name: user?.username
+        name: 'Test User'
       };
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
         paymentMethodType: 'Giropay',
         paymentMethodData: { billingDetails: billingDetails }
       });
       if (error) {
+        console.log('error', error)
         alert(error?.localizedMessage || '', amount);
       } else if (paymentIntent) {
-        alert('Payment Successfull')
+        onSuccess(`Payment of EUR ${amount} is successful! `)
       }
     }
   };
@@ -158,7 +166,7 @@ const usePaymentHook = () => {
     const clientSecret = await fetchPaymentIntentClientSecret({ amount, gateway: 'eps' });
     if (clientSecret) {
       const billingDetails: BillingDetails = {
-        name: user?.username
+        name: 'Test User'
       };
       const { error, paymentIntent } = await confirmPayment(clientSecret, {
         paymentMethodType: 'Eps',
@@ -167,7 +175,7 @@ const usePaymentHook = () => {
       if (error) {
         alert(error?.localizedMessage || '', amount);
       } else if (paymentIntent) {
-        alert('Payment successfull')
+        onSuccess(`Payment of EUR ${amount} is successful! `)
       }
     }
   };

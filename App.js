@@ -7,25 +7,17 @@
  */
 
 import React from 'react';
-import type {Node} from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+  StyleSheet, useColorScheme
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import {
+  Colors
+} from 'react-native/Libraries/NewAppScreen';
 import PrePaidWalletPopUp from './PrePaidWalletPopUp';
 
 const App = () => {
@@ -37,8 +29,8 @@ const App = () => {
 
   return (
     <StripeProvider
-    publishableKey='pk_test_51BTUDGJAJfZb9HEBwDg86TN1KNprHjkfipXmEDMb0gSCassK5T3ZfxsAbcgKVmAIXF7oZ6ItlZZbXO6idTHE67IM007EwQ4uN3'
-    urlScheme="demourl.com" // required for 3D Secure and bank redirects
+    publishableKey='pk_test_51KiaDaLxWLkd15GeXoTmIqL0EE00ACj275tHjkArAUZLGaCTnYiu3L8RN3rFaQHeJOcbDEbOpdBFjNioBo9aMSNe00XMJrZGOs'
+    urlScheme="stripeDemo://openApp" // required for 3D Secure and bank redirects
     merchantIdentifier="merchant.com.demo" // required for Apple Pay
    >
     <SafeAreaView style={backgroundStyle}>
@@ -46,12 +38,7 @@ const App = () => {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
        <PrePaidWalletPopUp />
-      
-      </ScrollView>
     </SafeAreaView>
     </StripeProvider>
   );
