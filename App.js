@@ -26,6 +26,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import PrePaidWalletPopUp from './PrePaidWalletPopUp';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -48,7 +49,7 @@ const App = () => {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Header />
+       <PrePaidWalletPopUp />
       
       </ScrollView>
     </SafeAreaView>
