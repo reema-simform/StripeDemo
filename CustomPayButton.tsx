@@ -11,19 +11,21 @@ const getText = (gateway?: string) => {
     return ' GiroPay'
   } else if (gateway === 'paypal') {
     return ' PayPal'
+  } else if (gateway === 'klarna') {
+    return ' Klarna'
   }
    else return null;
 };
 
 const CustomPayButton = ({ amount, gateway }) => {
-  const { giroPay, googlePay, epsPay, paypal } = usePaymentHook();
+  const { giroPay, googlePay, epsPay, klarnaPay } = usePaymentHook();
 
   // let disc:
   const openPaymentLink = {
     'giropay': () => giroPay({ amount }),
     'googlepay': () => googlePay({ amount }),
     'eps': () => epsPay({ amount }),
-    'paypal': () => paypal({ amount })
+    'klarna': () => klarnaPay({amount})
   };
 
   return (

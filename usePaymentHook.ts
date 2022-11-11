@@ -1,6 +1,7 @@
 import {
   BillingDetails,
   confirmApplePayPayment,
+  confirmSetupIntent,
   presentGooglePay,
   useApplePay,
   useConfirmPayment,
@@ -47,34 +48,7 @@ const usePaymentHook = () => {
     .catch((error) => {
      console.log(error)
     });
-    console.log(res)
     return res?.client_secret;
-  };
-
-
-  const handleResponse = ({ error, paymentIntent, amount }) => {
-    if (error) {
-      console.log('error',error)
-      alert(error?.localizedMessage);
-    } else if (paymentIntent) {
-      onSuccess(`Payment of EUR ${amount} is successful! `);
-    }
-  };
-
-  const paypal = async ({ amount }) => {
-    if (paymentLoading) return;
-    setPaymentLoading(true);
-    const clientSecret = await fetchPaymentIntentClientSecret({ amount, gateway: 'paypal' });
-    if (clientSecret) {
-      const billingDetails: BillingDetails = {
-        name: 'Test'
-      };
-      const { error, paymentIntent } = await confirmPayment(clientSecret, {
-        paymentMethodType: 'PayPal',
-        paymentMethodData: { billingDetails: billingDetails }
-      });
-      handleResponse({ error, paymentIntent, amount });
-    }
   };
 
   const googlePay = async ({ amount }) => {
@@ -180,6 +154,67 @@ const usePaymentHook = () => {
     }
   };
 
+  const klarnaPay = async ({ amount }) => {
+    if (paymentLoading) return;
+    setPaymentLoading(true);
+    const clientSecret = await fetchPaymentIntentClientSecret({ amount, gateway: 'klarna' });
+    if (clientSecret) {
+      const billingDetails: BillingDetails = {
+        name: 'Test User',
+        email: 'test@gmail.com',
+        address: { country: 'DE' }
+      };
+      const { error, paymentIntent } = await confirmPayment(clientSecret, {
+        paymentMethodType: 'Klarna',
+        paymentMethodData: { billingDetails: billingDetails }
+      });
+      if (error) {
+        alert(error?.localizedMessage || '', amount);
+      } else if (paymentIntent) {
+        onSuccess(`Payment of EUR ${amount} is successful! `)
+      }
+    }
+  };
+
+  const fetchSetUpIntentClientSecret = async() => {
+    const res =  await fetch(`${API_URL}/create-setup-intent`, {
+      method: 'POST'
+    }).then((response) => response.json())
+    .then((data) => data)
+    .catch((error) => {
+     console.log(error)
+    });
+    return res?.setupIntent;
+  }
+
+  const addCardToWallet = async () => {
+    if (paymentLoading) return;
+    setPaymentLoading(true);
+    const clientSecret = await fetchSetUpIntentClientSecret();
+    console.log('clientsecret',clientSecret)
+    if (clientSecret) {
+      const billingDetails: BillingDetails = {
+        email: 'test@gmail.com',
+        name: 'Test'
+      };
+      const { setupIntent, error } = await confirmSetupIntent(
+        clientSecret,
+        {
+          paymentMethodType: 'Card',
+          paymentMethodData: { billingDetails: billingDetails }
+        },
+        { setupFutureUsage: 'OnSession' }
+      );
+      if (setupIntent) {
+        alert('Card added succesfull!')
+      }
+      if (error){
+        alert('Error adding card. Please try again later.')
+      }
+      setPaymentLoading(false);
+    }
+  };
+
   return {
     paymentLoading,
     applePay,
@@ -188,7 +223,8 @@ const usePaymentHook = () => {
     isSupported,
     giroPay,
     epsPay,
-    paypal
+    klarnaPay,
+    addCardToWallet
   };
 };
 

@@ -36,8 +36,29 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     buttonContainer: {
-        marginTop: 100
-    }
+        marginVerticle: 10
+    },
+    cardStyle: {
+        borderWidth: 1,
+        backgroundColor: 'white',
+        borderColor: 'grey',
+        borderRadius: 6,
+        placeholderColor: 'white',
+        cursorColor: 'white',
+        textColor: 'white'
+      },
+      selectedCardStyle: {
+        backgroundColor: 'transparent',
+        borderColor: 'grey',
+        placeholderColor: 'transparent',
+        cursorColor: 'grey',
+        textColor: 'white'
+      },
+      cardFieldStyle: {
+        height: 70,
+        marginHorizontal: 10,
+        backgroundColor: 'white'
+      },
 
 });
 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text, View, Platform } from 'react-native';
+import { FlatList, Pressable, Text, View, Platform, ActivityIndicator } from 'react-native';
 import CustomPayButton from './CustomPayButton';
 import { ApplePayButton, useApplePay } from '@stripe/stripe-react-native';
 import styles from './styles';
@@ -10,21 +10,19 @@ const topUp = [5, 10, 25, 50, 100, 150, 200, 400, 800];
 
 const PrePaidWalletPopUp = ({ openShippingModal }) => {
   const [selected, setSelected] = useState<number>(0);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
-  const { fetchURLForPayPal, paypal } = usePaymentHook();
   const { isApplePaySupported } = useApplePay();
-  const { applePay } = usePaymentHook()
+  const { applePay, paymentLoading } = usePaymentHook()
 
   const renderApplePayButton = () => {
-    return <ApplePayButton onPress={applePay(topUp[selected])}
-     type="plain"
-    buttonStyle="black"
-    borderRadius={4}
-    style={{
-      width: '100%',
-      height: 50,
-    }}/>;
+    return <ApplePayButton
+      onPress={() => applePay(topUp[selected])}
+      type="plain"
+      buttonStyle="black"
+      borderRadius={4}
+      style={{
+        width: '100%',
+        height: 50,
+      }} />;
   };
 
   const GooglePayButton = () => {
@@ -33,9 +31,17 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
 
   const GiroPayButton = () => {
     return (
-      <CustomPayButton 
+      <CustomPayButton
         amount={topUp[selected]}
         gateway={'giropay'}
+      />
+    );
+  };
+  const KlarnaPayButton = () => {
+    return (
+      <CustomPayButton
+        amount={topUp[selected]}
+        gateway={'klarna'}
       />
     );
   };
@@ -50,10 +56,11 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
 
   const AllPaymentButton = () => {
     return (
-      <View style = {styles.buttonContainer}>
-        {Platform.OS === 'ios' ? isApplePaySupported? renderApplePayButton() : alert('Apple pay not supported') : GooglePayButton()}
-        {/* {GiroPayButton()} */}
-        {/* {EPSButton()} */}
+      <View style={styles.buttonContainer}>
+        {Platform.OS === 'ios' ? isApplePaySupported ? renderApplePayButton() : alert('Apple pay not supported') : GooglePayButton()}
+        {GiroPayButton()}
+        {EPSButton()}
+        {KlarnaPayButton()}
       </View>
     );
   };
@@ -78,6 +85,7 @@ const PrePaidWalletPopUp = ({ openShippingModal }) => {
         }}
       />
       {AllPaymentButton()}
+      { paymentLoading && <ActivityIndicator />}
     </View>
   );
 };
